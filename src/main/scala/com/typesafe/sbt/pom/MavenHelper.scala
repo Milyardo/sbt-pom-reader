@@ -232,18 +232,28 @@ object MavenHelper {
     * authentication realms of our server.  tested against nexus + artifactory. */
   def getServerRealm(method: String, uri: String): Option[String] = {
     // This is consigned to a Try until proper handling of offline mode.
-    Try {
-      val con = url(uri).openConnection.asInstanceOf[java.net.HttpURLConnection]
-      con setRequestMethod method
-      if (con.getResponseCode == 401) {
-        val authRealmConfigs = con.getHeaderField("WWW-Authenticate")
-        val BasicRealm = new scala.util.matching.Regex(
-          """.*[Bb][Aa][Ss][Ii][Cc]\s+[Rr][Ee][Aa][Ll][Mm]\=\"(.*)\".*""")
-        // Artifactory appears not to ask for authentication realm,but nexus does immediately.
-        BasicRealm.unapplySeq(authRealmConfigs) flatMap (_.headOption)
-      }
-      else None
-    } getOrElse(None)
+//    Try {
+//      val con = url(uri).openConnection.asInstanceOf[java.net.HttpURLConnection]
+//      con setRequestMethod method
+//      if (con.getResponseCode == 401) {
+//        val authRealmConfigs = con.getHeaderField("WWW-Authenticate")
+//        con.disconnect()
+//        val BasicRealm = new scala.util.matching.Regex(
+//          """.*[Bb][Aa][Ss][Ii][Cc]\s+[Rr][Ee][Aa][Ll][Mm]\=\"(.*)\".*""")
+//        // Artifactory appears not to ask for authentication realm,but nexus does immediately.
+//        BasicRealm.unapplySeq(authRealmConfigs) flatMap (_.headOption)
+//      }
+//      else {
+//        con.disconnect()
+//        None
+//      }
+//    } getOrElse(None)
+      if (uri contains "internal")
+        Some("Repository Archiva Managed internal Repository")
+      else if(uri contains "snapshots")
+        Some("Repository Archiva Managed snapshots Repository")
+      else
+        None
   }
 
   def getServerRealmSafe(uri: String): Option[String] = {
